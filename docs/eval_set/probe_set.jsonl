@@ -1,0 +1,8 @@
+{"id": "p01", "question": "인공지능 윤리원칙은 누가 정하고 어떤 내용이 들어가?", "out_of_scope": false, "purpose": "리랭커 점수 임계값 보정용(정답지와 분리된 held-out). 정답지로 임계값을 튜닝하지 않기 위함"}
+{"id": "p02", "question": "AI 데이터센터를 지으면 정부 지원을 받을 수 있어?", "out_of_scope": false, "purpose": "리랭커 점수 임계값 보정용(정답지와 분리된 held-out). 정답지로 임계값을 튜닝하지 않기 위함"}
+{"id": "p03", "question": "AI 스타트업 창업하면 나라에서 뭘 도와줘?", "out_of_scope": false, "purpose": "리랭커 점수 임계값 보정용(정답지와 분리된 held-out). 정답지로 임계값을 튜닝하지 않기 위함"}
+{"id": "p04", "question": "인공지능집적단지 지정이 취소되는 경우는?", "out_of_scope": false, "purpose": "리랭커 점수 임계값 보정용(정답지와 분리된 held-out). 정답지로 임계값을 튜닝하지 않기 위함"}
+{"id": "p05", "question": "저작권법상 AI 학습 데이터 공정이용 기준은 뭐야?", "out_of_scope": true, "purpose": "리랭커 점수 임계값 보정용(정답지와 분리된 held-out). 정답지로 임계값을 튜닝하지 않기 위함"}
+{"id": "p06", "question": "미국 AI 행정명령에는 어떤 내용이 있어?", "out_of_scope": true, "purpose": "리랭커 점수 임계값 보정용(정답지와 분리된 held-out). 정답지로 임계값을 튜닝하지 않기 위함"}
+{"id": "p07", "question": "자율주행차 사고가 나면 보험 책임은 누구한테 있어?", "out_of_scope": true, "purpose": "리랭커 점수 임계값 보정용(정답지와 분리된 held-out). 정답지로 임계값을 튜닝하지 않기 위함"}
+{"id": "p08", "question": "중국 생성형 AI 관리 규정 위반 벌금은 얼마야?", "out_of_scope": true, "purpose": "리랭커 점수 임계값 보정용(정답지와 분리된 held-out). 정답지로 임계값을 튜닝하지 않기 위함"}

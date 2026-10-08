@@ -22,3 +22,6 @@ QDRANT_URL = os.getenv(
     "QDRANT_URL",
     "http://localhost:6333"
 )
+
+# 국가법령정보 Open API 인증값(OC). "test"는 공용 샘플 계정이라 실사용 시 본인 OC로 교체
+LAW_OC = os.getenv("LAW_OC", "test")

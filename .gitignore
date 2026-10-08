@@ -221,3 +221,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+notebook/.cache/
+
+# gjc 에이전트 세션 기록
+.gjc/

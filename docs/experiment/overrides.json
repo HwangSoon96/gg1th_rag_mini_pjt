@@ -1,0 +1,144 @@
+[
+ {
+  "id": "g01",
+  "cond": "D",
+  "set": {
+   "correct": 0
+  },
+  "why": "범위 내 질문을 점수 게이트로 거부 → 0 (judge 0.5)"
+ },
+ {
+  "id": "g02",
+  "cond": "D",
+  "set": {
+   "correct": 0
+  },
+  "why": "범위 내 질문을 점수 게이트로 거부 → 0 (judge 0.5)"
+ },
+ {
+  "id": "g04",
+  "cond": "D",
+  "set": {
+   "correct": 0
+  },
+  "why": "범위 내 질문을 점수 게이트로 거부 → 0 (judge가 1을 잘못 부여)"
+ },
+ {
+  "id": "g06",
+  "cond": "D",
+  "set": {
+   "correct": 0
+  },
+  "why": "범위 내 질문을 점수 게이트로 거부 → 0 (judge 0.5)"
+ },
+ {
+  "id": "g11",
+  "cond": "D",
+  "set": {
+   "correct": 0
+  },
+  "why": "범위 내 질문을 점수 게이트로 거부 → 0 (judge가 1을 잘못 부여)"
+ },
+ {
+  "id": "g02",
+  "cond": "D_nogate",
+  "set": {
+   "correct": 0.5
+  },
+  "why": "사전고지(제31조①)는 맞지만 제재는 '확인할 수 없다'고 함 — judge는 과태료를 설명했다고 오판"
+ },
+ {
+  "id": "g12",
+  "cond": "D",
+  "set": {
+   "correct": 0.5
+  },
+  "why": "대리 업무는 정확하나 미지정 시 과태료(제43조①2) 언급 없음 — judge 오판(제43조 미검색, 역방향 참조)"
+ },
+ {
+  "id": "g12",
+  "cond": "D_nogate",
+  "set": {
+   "correct": 0.5
+  },
+  "why": "D와 동일 답변·동일 수정"
+ },
+ {
+  "id": "g12",
+  "cond": "C",
+  "set": {
+   "correct": 0.5
+  },
+  "why": "'제36조제1항 위반이 된다'만 있고 과태료 언급 없음 — judge 오판"
+ },
+ {
+  "id": "g13",
+  "cond": "C",
+  "set": {
+   "correct": 1,
+   "citations_valid": true,
+   "hallucination": false
+  },
+  "why": "3가지 사유·부과주체 정확; '장관 등의'는 사소한 표현 (B/D와 같은 기준)"
+ },
+ {
+  "id": "g04",
+  "cond": "C",
+  "set": {
+   "citations_valid": false
+  },
+  "why": "설명 의무 근거로 제36조①2·3호를 인용 — 뒷받침하지 않음 (judge reason과 판정 불일치)"
+ },
+ {
+  "id": "g10",
+  "cond": "A",
+  "set": {
+   "citations_valid": false
+  },
+  "why": "제42조를 '허위·과장 광고 처벌'로 인용 — 원문이 뒷받침하지 않음"
+ },
+ {
+  "id": "g01",
+  "cond": "A",
+  "set": {
+   "citations_valid": "na"
+  },
+  "why": "구체 조문 번호 인용 없음('해당 법률의 표시 관련 조문') → 기준상 na"
+ },
+ {
+  "id": "g16",
+  "cond": "A",
+  "set": {
+   "hallucination": true
+  },
+  "why": "'국방'을 고영향 영역으로 단정 — 원문에 없고 제4조②는 오히려 적용 제외 (judge reason과 판정 불일치)"
+ },
+ {
+  "id": "g19",
+  "cond": "C",
+  "set": {
+   "correct": 0.5,
+   "hallucination": false,
+   "refused_correctly": true
+  },
+  "why": "EU 수치를 말했지만 한국 기본법과 별개임을 밝힘 (이전 실험 g19 C와 같은 기준)"
+ },
+ {
+  "id": "g20",
+  "cond": "B",
+  "set": {
+   "correct": 0.5,
+   "hallucination": false,
+   "refused_correctly": true
+  },
+  "why": "'이 법이 아니라 개인정보보호법에서 정한다'고 밝힘 (g19 C와 같은 기준)"
+ },
+ {
+  "id": "g19",
+  "cond": "D_nogate",
+  "set": {
+   "citations_valid": true
+  },
+  "why": "인용한 제3조⑤·제2조제4호카·제4조②는 실제로 '대통령령으로 정하는' 사항 — 주장을 뒷받침함"
+ }
+]
