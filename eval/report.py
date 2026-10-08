@@ -67,17 +67,32 @@ def qchips(qs, cls):
     return "".join(f'<span class="qc {cls}" title="{e(q["question"])}">{q["id"]}</span>' for q in qs) or '<span class="none">없음</span>'
 
 
+# ---------- 용어 우선 표기: "Query Rewriting (S3)" ----------
+# 코드(S0~S4·C0~C2)는 누적 순서를 보여 주는 보조 표기로만 쓴다.
+SHORT = {"S0": "기준선", "S1": "Chunking", "S2": "Hybrid", "S3": "Query Rewriting", "S4": "Reranking",
+         "C0": "상위 5개만", "C1": "정의·참조", "C2": "역참조"}
+
+
+def term(k, label):
+    """표·카드 제목: 용어를 앞에, 코드는 뒤에 작게."""
+    return f'{e(label.removeprefix("+ "))}<span class="code">{k}</span>'
+
+
+def col_head(k):
+    return f'{e(SHORT[k])}<small class="code">{k}</small>'
+
+
 # ---------- 섹션: 검색 ----------
 s = R["stages"]
 first, last = s[STAGES[0]], s[STAGES[-1]]
 stage_rows = "".join(
-    f'<tr><th><span class="tag">{k}</span>{e(v["label"])}</th><td>{bar(v["hit3"], k == STAGES[-1])}</td>'
+    f'<tr><th>{term(k, v["label"])}</th><td>{bar(v["hit3"], k == STAGES[-1])}</td>'
     f'<td>{bar(v["recall5"], k == STAGES[-1])}</td><td>{bar(v["mrr"], k == STAGES[-1], f"{v['mrr']:.2f}")}</td></tr>'
     for k, v in s.items())
 # C1·C2: 검색(S4 상위 5개)은 그대로이고 Context에 조문을 더 붙인 것 → 순위 지표(Hit@3·MRR)는 없고 Recall만 있다.
 # C0 = S4 상위 5개라 S4 Recall@5와 같아서 행을 따로 두지 않는다.
 stage_rows += "".join(
-    f'<tr class="ctx"><th><span class="tag">{k}</span>{e(R["context"][k]["label"])}</th><td class="na">–</td>'
+    f'<tr class="ctx"><th>{term(k, R["context"][k]["label"])}</th><td class="na">–</td>'
     f'<td>{bar(R["context"][k]["recall"], k == CTX[-1])}</td><td class="na">–</td></tr>' for k in CTX[1:])
 types = list(first["by_type"])
 type_rows = "".join(
@@ -105,7 +120,7 @@ for a, b in chain:
         m = (f'Recall(Context 전체) {pct(c[a]["recall"])}→{pct(c[b]["recall"])} {delta(c[a]["recall"], c[b]["recall"])} · '
              f'정답 조문 전부 포함 {pct(c[a]["all_gold"])}→{pct(c[b]["all_gold"])} {delta(c[a]["all_gold"], c[b]["all_gold"])}')
         label = c[b]["label"]
-    cards.append(f"""<article class="step"><header><span class="tag">{b}</span><h3>{e(label)}</h3></header>
+    cards.append(f"""<article class="step"><header><h3>{term(b, label)}</h3></header>
 <dl><dt>문제</dt><dd>{e(prob)}</dd><dt>바꾼 것</dt><dd>{e(change)}</dd><dt>추가 비용</dt><dd>{e(cost)}</dd></dl>
 <p class="metric">{m}</p>
 <p class="flip"><span>나아진 문항</span>{qchips(up, "up")}</p><p class="flip"><span>나빠진 문항</span>{qchips(down, "down")}</p></article>""")
@@ -158,10 +173,10 @@ for i in ex_ids:
 
 c0, c1, c2 = (R["context"][k] for k in CTX)
 mh = {k: R["context"][k]["by_type"].get("multi-hop") for k in CTX}
-kpis = [("상위 3위 안에 정답 조문", pct(first["hit3"]), pct(last["hit3"]), f"{STAGES[0]} → {STAGES[-1]}"),
-        ("필요한 조문 확보율 (Recall@5)", pct(first["recall5"]), pct(last["recall5"]), f"{STAGES[0]} → {STAGES[-1]}"),
-        ("LLM에 넘긴 Context의 Recall", pct(c0["recall"]), pct(c2["recall"]), "상위 5개만(C0) → 참조·역참조 추가(C2)"),
-        ("multi-hop 문항 Recall", pct(mh["C0"]), pct(mh["C2"]), "C0 → C2 (9문항만)")]
+kpis = [("상위 3위 안에 정답 조문", pct(first["hit3"]), pct(last["hit3"]), "500자 분할 → Reranking까지"),
+        ("필요한 조문 확보율 (Recall@5)", pct(first["recall5"]), pct(last["recall5"]), "500자 분할 → Reranking까지"),
+        ("LLM에 넘긴 Context의 Recall", pct(c0["recall"]), pct(c2["recall"]), "상위 5개만 → 역참조까지"),
+        ("multi-hop 문항 Recall", pct(mh["C0"]), pct(mh["C2"]), "상위 5개만 → 역참조까지 (9문항)")]
 if A:
     kpis.append(("답변 정확도", pct(base.get("A", {}).get("accuracy")), pct(A["accuracy"]), "LLM 단독 → 이번 서비스"))
 kpi_html = "".join(f'<div class="kpi"><p>{e(t)}</p><strong><s>{a}</s> {b}</strong><small>{e(n)}</small></div>'
@@ -202,6 +217,8 @@ table{{width:100%;border-collapse:collapse}}
 .bar i{{position:absolute;inset:0 auto 0 0;background:var(--g3);border-radius:6px}}.bar i.hi{{background:var(--blue)}}
 .bar b{{position:absolute;left:8px;top:1px;font-size:13px}}
 .num{{text-align:right;font-variant-numeric:tabular-nums}}
+.code{{margin-left:6px;font-size:11px;font-weight:600;color:var(--g3,#8b95a1);letter-spacing:.02em}}
+th small.code{{display:block;margin-left:0;font-weight:500}}
 .tag{{display:inline-block;font-size:12px;font-weight:700;color:var(--blue);background:var(--blue-bg);border-radius:6px;padding:1px 7px;margin-right:6px}}
 .note{{color:var(--g5);font-size:13px;margin-top:10px}}
 .steps{{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}}
@@ -236,7 +253,7 @@ td.na{{color:var(--g3,#8b95a1);text-align:center}}tr.ctx th{{border-top:2px dash
 <table class="bt"><thead><tr><th>단계</th><th>Hit@3</th><th>Recall@5 · C는 Context 전체</th><th>MRR</th></tr></thead><tbody>{stage_rows}</tbody></table>
 <p class="note">Hit@3: 상위 3개 조문에 정답 조문이 하나라도 있는 비율 · Recall@5: 정답 조문 중 상위 5개에 든 비율 · MRR: 첫 정답 조문 순위의 역수 평균 · 범위 안 {g["in_scope"]}문항, 조 단위<br>C1·C2는 검색 순위는 S4 그대로 두고 LLM에 넘기는 Context에 조문을 더 붙인 단계라, 순위 지표(Hit@3·MRR)는 없고 Recall을 상위 5개 대신 Context 전체 기준으로 재었어요. C0(상위 5개만)는 S4와 같아요.</p>
 <h3 style="margin-top:28px;font-size:17px">유형별 Recall</h3>
-<table class="bt"><thead><tr><th>유형</th>{"".join(f'<th class="num">{k}</th>' for k in STAGES + CTX[1:])}</tr></thead><tbody>{type_rows}</tbody></table>
+<table class="bt"><thead><tr><th>유형</th>{"".join(f'<th class="num">{col_head(k)}</th>' for k in STAGES + CTX[1:])}</tr></thead><tbody>{type_rows}</tbody></table>
 </section>
 
 <section id="q3"><p class="eyebrow">질문 2</p><h2>검색 품질을 어떻게 개선했나</h2>
@@ -244,7 +261,7 @@ td.na{{color:var(--g3,#8b95a1);text-align:center}}tr.ctx th{{border-top:2px dash
 <div class="steps">{"".join(cards)}</div>
 <h3 style="margin-top:36px;font-size:17px">문항별로 보기</h3>
 <div class="legend"><span><i style="background:var(--blue)"></i>정답 조문 전부</span><span><i style="background:#90C2FF"></i>일부</span><span><i style="background:var(--g1)"></i>못 찾음</span>{'<span><i class="hm na" style="border:0"></i>채점 안 함</span>' if ans_on else ""}</div>
-<div class="hmwrap"><table class="hmt"><thead><tr><th>문항</th><th>유형</th>{"".join(f"<th>{k}</th>" for k in cols)}{"<th>답변</th>" if ans_on else ""}</tr></thead><tbody>{heat}</tbody></table></div>
+<div class="hmwrap"><table class="hmt"><thead><tr><th>문항</th><th>유형</th>{"".join(f'<th title="{e(SHORT[k])}">{k}</th>' for k in cols)}{"<th>답변</th>" if ans_on else ""}</tr></thead><tbody>{heat}</tbody></table></div>
 <p class="note">S0~S4 칸은 상위 5개 조문, C1·C2 칸은 답변에 실제로 넣은 Context 전체 기준이에요.</p>
 </section>
 
@@ -283,17 +300,17 @@ auto = {
     "summary": "\n".join(f"- **{t}**: {a} → **{b}** ({n})" for t, a, b, n in kpis),
     "meta": (f"Golden Test Set `{g['path']}` {g['count']}문항 중 {g['evaluated']}문항 평가(범위 안 {g['in_scope']}문항) · "
              + " · ".join(f"{k} {v}" for k, v in g["types"].items()) + f" · 생성일 {date.today().isoformat()}"),
-    "stages": md_table(["단계", "바꾼 것", "Hit@3", "Recall@5", "MRR", "나아진 문항", "나빠진 문항"],
-                       [[k, v["label"], pct(v["hit3"]), pct(v["recall5"]), f'{v["mrr"]:.2f}',
+    "stages": md_table(["단계", "구성", "Hit@3", "Recall@5", "MRR", "나아진 문항", "나빠진 문항"],
+                       [[f"{SHORT[k]} ({k})", v["label"].removeprefix("+ "), pct(v["hit3"]), pct(v["recall5"]), f'{v["mrr"]:.2f}',
                          *(map(ids, flips(STAGES[i - 1], k)) if i else ("–", "–"))]
                         for i, (k, v) in enumerate(s.items())]),
-    "types": md_table(["유형", *STAGES, *CTX[1:]], [[f"{t} ({R['golden']['types'].get(t, '')})",
+    "types": md_table(["유형", *(f"{SHORT[k]} ({k})" for k in STAGES + CTX[1:])], [[f"{t} ({R['golden']['types'].get(t, '')})",
                                               *(pct(s[k]["by_type"][t]["recall5"]) for k in STAGES),
                                               *(pct(R["context"][k]["by_type"].get(t)) for k in CTX[1:])] for t in types]
                       + [[f"**전체 ({R['golden']['in_scope']})**", *(f'**{pct(s[k]["recall5"])}**' for k in STAGES),
                           *(f'**{pct(R["context"][k]["recall"])}**' for k in CTX[1:])]]),
-    "context": md_table(["Context", "구성", "Recall(Context 전체)", "정답 조문 전부 포함", "multi-hop Recall", "나아진 문항"],
-                        [[k, v["label"], pct(v["recall"]), pct(v["all_gold"]), pct(v["by_type"].get("multi-hop")),
+    "context": md_table(["단계", "구성", "Recall(Context 전체)", "정답 조문 전부 포함", "multi-hop Recall", "나아진 문항"],
+                        [[f'{SHORT[k]} ({k})', v["label"].removeprefix("+ "), pct(v["recall"]), pct(v["all_gold"]), pct(v["by_type"].get("multi-hop")),
                           ids(flips(CTX[i - 1], k)[0]) if i else "–"] for i, (k, v) in enumerate(R["context"].items())]),
     "answers": md_table(["방식", "문항", "정확도", "할루시네이션", "인용 정확", "질문당 입력 토큰"],
                         [[NAMES[k], "20 (이전 실험)", pct(base[k]["accuracy"]), pct(base[k]["hallucination_rate"]),

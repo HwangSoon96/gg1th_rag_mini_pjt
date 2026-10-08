@@ -82,17 +82,18 @@ flowchart TB
 ## 4. 개선 과정
 
 기법을 하나씩 더하며 같은 Golden Test Set으로 재측정
+S = 검색 단계(S0 기준선 → S4, 앞 단계에 누적), C = LLM에 넘기는 Context 구성 단계
 
 ![단계별 검색 지표](docs/images/report_stages.png)
 
 | 단계 | 문제 | 해결 | 결과 |
 |---|---|---|---|
-| S1 Chunking | 500자 분할이 정의·목록을 자름 | 조문 1개 = Chunk 1개 (제2조만 호 단위) | Hit@3 66 → **83%** |
-| S2 Hybrid | 임베딩이 고유명사·조문 번호를 놓침 | Dense + BM25, RRF | Hit@3 → **89%** · Recall@5 75 → 71% ▼ |
-| S3 Query Rewriting | 일상어 ↔ 법률 용어 거리 | 법률 용어 재작성 + Sub-query | Recall@5 → **79%** · MRR → **0.94** |
-| S4 Reranking | 정답이 후보 안에 있지만 순위 밀림 | Cross-encoder 20 → 5 | Hit@3 **100%** · MRR **1.00** |
-| C1 정의·참조 | 정의 조문·참조 조문 누락 | 정의 호, 참조 항·호 첨부 | Context Recall → **90%** |
-| C2 역참조 | 제재 조문이 Context에 안 들어옴 | 제재 조문 역색인 | Context Recall → **98%** |
+| Chunking (S1) | 500자 분할이 정의·목록을 자름 | 조문 1개 = Chunk 1개 (제2조만 호 단위) | Hit@3 66 → **83%** |
+| Hybrid Search (S2) | 임베딩이 고유명사·조문 번호를 놓침 | Dense + BM25, RRF | Hit@3 → **89%** · Recall@5 75 → 71% ▼ |
+| Query Rewriting (S3) | 일상어 ↔ 법률 용어 거리 | 법률 용어 재작성 + Sub-query | Recall@5 → **79%** · MRR → **0.94** |
+| Reranking (S4) | 정답이 후보 안에 있지만 순위 밀림 | Cross-encoder 20 → 5 | Hit@3 **100%** · MRR **1.00** |
+| 정의·참조 첨부 (C1) | 정의 조문·참조 조문 누락 | 정의 호, 참조 항·호 첨부 | Context Recall → **90%** |
+| 역참조 (C2) | 제재 조문이 Context에 안 들어옴 | 제재 조문 역색인 | Context Recall → **98%** |
 
 ### 핵심: 역참조
 
@@ -120,7 +121,7 @@ flowchart LR
 
 </td><td>
 
-![C2 역참조](docs/images/report_step_c2.png)
+![역참조 단계 카드](docs/images/report_step_c2.png)
 
 </td></tr></table>
 
@@ -129,28 +130,28 @@ flowchart LR
 <details>
 <summary>단계별 상세 (가설 · 트레이드오프 · 시행착오)</summary>
 
-**S1 Chunking**
+**Chunking (S1)**
 - 가설: 법은 조문이 의미 단위
 - 1,911자인 제2조(정의)만 호 단위로 분할, 모든 Chunk 앞에 `[장 > 절 > 제N조(제목)]` 경로
 
-**S2 Hybrid**
+**Hybrid Search (S2)**
 - 형태소 분석기 없이 공백 단어 + 글자 bigram으로 한국어 조사 대응
 - 질문에 `제N조`가 있으면 해당 조문 우선
-- 트레이드오프: 일상어 질문(g02, g22)에서 BM25가 엉뚱한 조문을 올려 Recall 하락 → S3에서 법률 용어로 바꾼 질의에 BM25를 걸어 회복
+- 트레이드오프: 일상어 질문(g02, g22)에서 BM25가 엉뚱한 조문을 올려 Recall 하락 → Query Rewriting(S3)에서 법률 용어로 바꾼 질의에 BM25를 걸어 회복
 
-**S3 Query Rewriting**
+**Query Rewriting (S3)**
 - LLM 1회로 `{"rewrite", "subqueries": [≤3]}` 생성, 원 질문·재작성·Sub-query 각각 검색 후 RRF
 - 답변에는 원 질문 사용 (재작성이 의도를 바꾸는 위험 차단)
 - JSON 파싱 실패 시 원 질문만으로 계속
 
-**S4 Reranking**
-- 트레이드오프: 정답이 여러 개인 multi-hop(g13, g14, g32)에서 보조 쟁점 조문이 5위 밖으로 밀림 → C2에서 보완
+**Reranking (S4)**
+- 트레이드오프: 정답이 여러 개인 multi-hop(g13, g14, g32)에서 보조 쟁점 조문이 5위 밖으로 밀림 → 역참조(C2)에서 보완
 
-**C1 정의·참조**
+**정의·참조 첨부 (C1)**
 - 정의어: 제2조 각 호 + 본문의 `(이하 "X"라 한다)` 자동 추출, 정의 조문이 상위에 없을 때만 첨부
 - 정방향 참조: `제N조제M항` 1단계, 해당 항·호만 최대 6개
 
-**C2 역참조**
+**역참조 (C2)**
 - 대상: 제40조(사실조사), 제42조(벌칙), 제43조(과태료)
 - 시행착오: 항 단위 색인 시 항 본문에 호가 포함돼 같은 참조가 중복 → 더 구체적인 단위(호) 하나만 남기도록 수정, 테스트로 고정
 
