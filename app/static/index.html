@@ -130,8 +130,8 @@ button.tag:hover{background:var(--g2)}
 .bar{display:grid;grid-template-columns:minmax(80px,38%) 1fr 44px;gap:10px;align-items:center;font-size:13px;border:0;background:none;padding:2px 0;cursor:pointer;text-align:left;width:100%;border-radius:8px}
 .bar:hover{background:var(--g0)}
 .bar .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bar .tr{height:10px;background:var(--g1);border-radius:5px;overflow:hidden}
-.bar .fl{height:100%;background:var(--g4);border-radius:5px;transition:width .2s ease-out}
+.bar .tr{display:block;height:10px;background:var(--g1);border-radius:5px;overflow:hidden}
+.bar .fl{display:block;height:100%;background:var(--g4);border-radius:5px;transition:width .2s ease-out}
 .bar.used .fl{background:var(--blue)}
 .bar .sc{text-align:right;color:var(--g5);font-variant-numeric:tabular-nums}
 .legend{margin-top:6px;font-size:12px;color:var(--g4)}
